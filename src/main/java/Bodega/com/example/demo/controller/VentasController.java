@@ -23,6 +23,7 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RequestPredicates.accept;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
+
 @Configuration
 public class VentasController {
     private ReactiveMongoTemplate template;
@@ -32,38 +33,65 @@ public class VentasController {
     }
 
 
-
     @Bean
     public RouterFunction<ServerResponse> createSales() {
         return route(
                 POST("/create/").and(accept(MediaType.APPLICATION_JSON)),
-                request -> template.save(request.bodyToMono(SalesModel.class), "Sales")
-                        .then(ServerResponse.ok().build())
-        );
+                request ->{
+                    creacionDespuesdeValidacion(request).then();
+                    return ServerResponse.ok().build();
+                } );
     }
 
-//    public void handleCreateSale(ServerRequest request){
-//        validarStock(request).doOnNext()
-//    }
-    public Mono<Void> validarStock(ServerRequest request){
-        return request.bodyToMono(SalesModel.class).flatMap(s -> {
-            var productlist=s.getProducts();
-            var listaIDProductos=productlist.stream().map(Producto::getIdProduct
-            ).collect(Collectors.toList());
-            template.find(findProducts(listaIDProductos),Product.class,"Products")
-                    .collectList().doOnNext(p -> {
-                        if (p.size()!= productlist.size()){
-                            throw new RuntimeException(productlist.size()-p.size()+"de los productos no esta disponible");
-                        }
-                        productlist.forEach((pr)->pr.getCantidad());
-                        productlist.stream().findFirst();
-                    });
-            return Mono.empty();
+    public Mono<Object> creacionDespuesdeValidacion(ServerRequest request){
+        validation(request);
+        template.save();
+        return Mono.empty();
+    }
+
+    public Mono<List<Product>> validation(ServerRequest request) {
+        return obtenerProductosCompra(request).flatMap(lista -> {
+            return listaStock(lista).doOnNext(p -> {
+                validacionExistencia(p, lista);
+                validacionStockminimo(p);
+                validaciontopeventaProductosCompra(p,lista);
+            });
+        });
+    }
+    public Mono<List<Producto>> obtenerProductosCompra(ServerRequest request) {
+        return request.bodyToMono(SalesModel.class).flatMap(sales -> Mono.just(sales.getProducts()));
+    }
+    public Mono<List<Product>> listaStock(List<Producto> productos) {
+        var listaId = productos.stream().map(p -> p.getIdProduct()).collect(Collectors.toList());
+        return template.find(findProducts(listaId), Product.class, "Products")
+                .collectList();
+    }
+    public Mono<Void> validacionExistencia(List<Product> listaProductosExistentes, List<Producto> productosVenta) {
+        if (listaProductosExistentes.size() != productosVenta.size()) {
+            throw new RuntimeException(productosVenta.size() - listaProductosExistentes.size() + "de los productos no esta disponible");
+        }
+        return Mono.empty();
+    }
+    private void validaciontopeventaProductosCompra(List<Product> productosexistentes, List<Producto> ProductosPorComprar) {
+        productosexistentes.forEach(product -> {
+            var productoActual = ProductosPorComprar.stream()
+                    .filter(sale -> sale.getIdProduct() == product.getIdProduct())
+                    .findFirst().orElseThrow();
+            if (product.getMin() < productoActual.getCantidad() ||
+                    product.getMax() > productoActual.getCantidad()) {
+                throw new RuntimeException("No se puede realizar la compra por los topes");
+            }
+        });
+    }
+    private void validacionStockminimo(List<Product> productosexistentes){
+        productosexistentes.forEach(product -> {
+            if (product.getInventory()<product.getMin()){
+                throw new RuntimeException(product.getNombre()+" Sin stock minimo para venta");
+            }
         });
     }
 
-
-    private Query findProducts(List <Integer> ID) {
+    private Query findProducts(List<Integer> ID) {
         return new Query(Criteria.where("_id").in(ID));
     }
 

@@ -1,11 +1,20 @@
 package Bodega.com.example.demo.model;
 
 public class Product {
+        private int IdProduct;
         private String nombre;
         private boolean enabled;
         private int inventory;
         private int min;
         private int max;
+
+    public int getIdProduct() {
+        return IdProduct;
+    }
+
+    public void setIdProduct(int idProduct) {
+        IdProduct = idProduct;
+    }
 
     public String getNombre() {
         return nombre;

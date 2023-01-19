@@ -1,15 +1,16 @@
 package Bodega.com.example.demo.model;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SalesModel {
 
     private LocalDate name;
     private String IdType;
-    private int ID;
+    private Integer ID;
     private String ClientNAme;
-    private List <Producto> Products;
+    private List<Producto> Products;
 
     public LocalDate getName() {
         return name;
