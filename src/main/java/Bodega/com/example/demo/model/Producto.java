@@ -1,6 +1,6 @@
 package Bodega.com.example.demo.model;
 
-public class ProductDto {
+public class Producto {
     private int IdProduct;
     private int Cantidad;
 

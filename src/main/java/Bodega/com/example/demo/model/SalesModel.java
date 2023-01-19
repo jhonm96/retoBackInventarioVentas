@@ -9,7 +9,7 @@ public class SalesModel {
     private String IdType;
     private int ID;
     private String ClientNAme;
-    private List <ProductDto> Products;
+    private List <Producto> Products;
 
     public LocalDate getName() {
         return name;
@@ -43,11 +43,11 @@ public class SalesModel {
         ClientNAme = clientNAme;
     }
 
-    public List<ProductDto> getProducts() {
+    public List<Producto> getProducts() {
         return Products;
     }
 
-    public void setProducts(List<ProductDto> products) {
+    public void setProducts(List<Producto> products) {
         Products = products;
     }
 }

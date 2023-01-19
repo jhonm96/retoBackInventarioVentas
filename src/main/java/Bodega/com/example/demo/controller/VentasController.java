@@ -1,7 +1,7 @@
 package Bodega.com.example.demo.controller;
 
 import Bodega.com.example.demo.model.Product;
-import Bodega.com.example.demo.model.ProductDto;
+import Bodega.com.example.demo.model.Producto;
 import Bodega.com.example.demo.model.SalesModel;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +14,7 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,24 +37,32 @@ public class VentasController {
     public RouterFunction<ServerResponse> createSales() {
         return route(
                 POST("/create/").and(accept(MediaType.APPLICATION_JSON)),
-                request -> template.save(request.bodyToMono(Product.class), "Sales")
+                request -> template.save(request.bodyToMono(SalesModel.class), "Sales")
                         .then(ServerResponse.ok().build())
         );
     }
 
-    public void handleCreateSale(ServerRequest request){
-        request.bodyToMono(SalesModel.class).flatMap(s -> {
+//    public void handleCreateSale(ServerRequest request){
+//        validarStock(request).doOnNext()
+//    }
+    public Mono<Void> validarStock(ServerRequest request){
+        return request.bodyToMono(SalesModel.class).flatMap(s -> {
             var productlist=s.getProducts();
-            var listaIDProductos=productlist.stream().map(ProductDto::getIdProduct
+            var listaIDProductos=productlist.stream().map(Producto::getIdProduct
             ).collect(Collectors.toList());
             template.find(findProducts(listaIDProductos),Product.class,"Products")
                     .collectList().doOnNext(p -> {
                         if (p.size()!= productlist.size()){
                             throw new RuntimeException(productlist.size()-p.size()+"de los productos no esta disponible");
                         }
-                    })
-        })
+                        productlist.forEach((pr)->pr.getCantidad());
+                        productlist.stream().findFirst();
+                    });
+            return Mono.empty();
+        });
     }
+
+
     private Query findProducts(List <Integer> ID) {
         return new Query(Criteria.where("_id").in(ID));
     }
