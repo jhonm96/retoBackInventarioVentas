@@ -1,6 +1,6 @@
 package Bodega.com.example.demo.model;
 
-public class Model {
+public class Product {
         private String nombre;
         private boolean enabled;
         private int inventory;

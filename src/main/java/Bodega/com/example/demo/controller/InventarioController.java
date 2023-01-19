@@ -1,6 +1,6 @@
 package Bodega.com.example.demo.controller;
 
-import Bodega.com.example.demo.model.Model;
+import Bodega.com.example.demo.model.Product;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
@@ -36,7 +36,7 @@ public class InventarioController {
     public RouterFunction<ServerResponse> createCategory() {
         return route(
                 POST("/create/").and(accept(MediaType.APPLICATION_JSON)),
-                request -> template.save(request.bodyToMono(Model.class), "Products")
+                request -> template.save(request.bodyToMono(Product.class), "Products")
                         .then(ServerResponse.ok().build())
         );
     }
@@ -45,10 +45,10 @@ public class InventarioController {
     public RouterFunction<ServerResponse> listarCategory() {
         return route(
                 GET("/list/").and(accept(MediaType.APPLICATION_JSON)),
-                request -> template.findAll((Model.class), "Products").collectList()
+                request -> template.findAll((Product.class), "Products").collectList()
                         .flatMap(list -> ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)
-                        .body(BodyInserters.fromPublisher(Flux.fromIterable(list), Model.class)))
+                        .body(BodyInserters.fromPublisher(Flux.fromIterable(list), Product.class)))
         );
     }
 
@@ -57,7 +57,7 @@ public class InventarioController {
     public RouterFunction<ServerResponse> DeleteCategory() {
         return route(
                 DELETE("/delete/{name}").and(accept(MediaType.APPLICATION_JSON)),
-                request -> template.findAndRemove(findProduct(request.pathVariable("name")), (Model.class), "Products")
+                request -> template.findAndRemove(findProduct(request.pathVariable("name")), (Product.class), "Products")
                         .then(ServerResponse.ok().build())
         );
     }
