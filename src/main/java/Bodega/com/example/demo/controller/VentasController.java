@@ -33,33 +33,32 @@ public class VentasController {
         this.template = template;
     }
 
-
     @Bean
     public RouterFunction<ServerResponse> createSales() {
         return route(
-                POST("/create/").and(accept(MediaType.APPLICATION_JSON)),
+                POST("/createventa/").and(accept(MediaType.APPLICATION_JSON)),
                 request -> {
-                    creacionDespuesdeValidacion(request).doOnNext((mono)-> mono.subscribe());
-                    return creacionDelaventa(request).then(ServerResponse.ok().build());
+                    descuentodeInventario(request).doOnNext((mono)-> mono.subscribe());
+                    return creacionDelaventa(request);
 
                 });
     }
-    //.doOnNext((mono)-> mono.subscribe())
+    //creacionDelaventa(request).then(ServerResponse.ok().build())
 
-    public Mono<ServerResponse> creacionDelaventa(ServerRequest request){
+
+    public Mono<ServerResponse> creacionDelaventa(ServerRequest request) {
         return template.save(request.bodyToMono(SalesModel.class), "Sales")
                 .then(ServerResponse.ok().build());
     }
 
-    public Flux<Mono<Product>> creacionDespuesdeValidacion(ServerRequest request) {
+    public Flux<Mono<Product>> descuentodeInventario(ServerRequest request) {
         return obtenerProductosCompra(request).flatMapMany(productoscompra -> {
             return validation(request).flatMapMany(listaproductosexistentesvalidada -> {
-                var productoActualizado=ActualizacionInventario(listaproductosexistentesvalidada,productoscompra);
+                var productoActualizado = ActualizacionInventario(listaproductosexistentesvalidada, productoscompra);
+                var productos = productoActualizado.stream().map(guardadoproductosactualizados ->
+                        template.findAndReplace(findProductParaActualizar(guardadoproductosactualizados.getIdproducts()),
+                                guardadoproductosactualizados, new FindAndReplaceOptions().returnNew(), Product.class, "Product")).toList();
 
-                var productos= productoActualizado.stream().map(guardadoproductosactualizados->
-                        template.findAndReplace(findProductParaActualizar(guardadoproductosactualizados.getIdProduct()),
-                                guardadoproductosactualizados,new FindAndReplaceOptions().returnNew(),Product.class,"Product"))
-                                .collect(Collectors.toList());
                 return Flux.fromIterable(productos);
             });
         });
@@ -68,10 +67,10 @@ public class VentasController {
     public List<Product> ActualizacionInventario(List<Product> listaProductosExistentes, List<Producto> productosVenta) {
         return listaProductosExistentes.stream().map(actualizacion -> {
             var productoVendido = productosVenta.stream()
-                    .filter(comparandoproducto -> comparandoproducto.getIdProduct() == actualizacion.getIdProduct()).findFirst().orElseThrow();
-            actualizacion.setInventory(actualizacion.getInventory()-productoVendido.getCantidad());
+                    .filter(comparandoproducto -> comparandoproducto.getidProduct() == actualizacion.getIdproducts()).findFirst().orElseThrow();
+             actualizacion.setInventory(actualizacion.getInventory() - productoVendido.getcantidad());
             return actualizacion;
-        }).collect(Collectors.toList());
+        }).toList();
     }
 
 
@@ -91,28 +90,27 @@ public class VentasController {
     }
 
     public Mono<List<Product>> listaStock(List<Producto> productos) {
-        var listaId = productos.stream().map(p -> p.getIdProduct()).collect(Collectors.toList());
+        var listaId = productos.stream().map(Producto::getidProduct).toList();
         return template.find(findProducts(listaId), Product.class, "Products")
                 .collectList();
     }
 
-    public Mono<Void> validacionExistencia(List<Product> listaProductosExistentes, List<Producto> productosVenta) {
+    public void validacionExistencia(List<Product> listaProductosExistentes, List<Producto> productosVenta) {
         if (listaProductosExistentes.size() != productosVenta.size()) {
             throw new RuntimeException(productosVenta.size() - listaProductosExistentes.size() + "de los productos no esta disponible");
         }
-        return Mono.empty();
     }
 
-    private void validaciontopeventaProductosCompra(List<Product> productosexistentes, List<Producto> ProductosPorComprar) {
+    private void validaciontopeventaProductosCompra(List<Product> productosexistentes, List<Producto> productosPorComprar) {
         productosexistentes.forEach(product -> {
-            var productoActual = ProductosPorComprar.stream()
-                    .filter(sale -> sale.getIdProduct() == product.getIdProduct())
+            var productoActual = productosPorComprar.stream()
+                    .filter(sale -> sale.getidProduct() == product.getIdproducts())
                     .findFirst().orElseThrow();
-            if (product.getMin() < productoActual.getCantidad() ||
-                    product.getMax() > productoActual.getCantidad()) {
+            if (product.getMin() < productoActual.getcantidad() ||
+                    product.getMax() > productoActual.getcantidad()) {
                 throw new RuntimeException("No se puede realizar la compra por los topes");
             }
-            if (productoActual.getCantidad() > product.getInventory()) {
+            if (productoActual.getcantidad() > product.getInventory()) {
                 throw new RuntimeException("No hay suficientes unidades en inventario");
             }
         });
@@ -126,21 +124,22 @@ public class VentasController {
         });
     }
 
-    private Query findProducts(List<Integer> ID) {
-        return new Query(Criteria.where("_id").in(ID));
+    private Query findProducts(List<Integer> id) {
+        return new Query(Criteria.where("_id").in(id));
     }
-    private Query findProductParaActualizar(int ID) {
-        return new Query(Criteria.where("_id").in(ID));
+
+    private Query findProductParaActualizar(int id) {
+        return new Query(Criteria.where("_id").in(id));
     }
 
     @Bean
-    public RouterFunction<ServerResponse> History() {
+    public RouterFunction<ServerResponse> historyOfSales() {
         return route(
                 GET("/history/").and(accept(MediaType.APPLICATION_JSON)),
-                request -> template.findAll((Product.class), "Sales").collectList()
+                request -> template.findAll(SalesModel.class, "Sales").collectList()
                         .flatMap(list -> ServerResponse.ok()
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .body(BodyInserters.fromPublisher(Flux.fromIterable(list), Product.class)))
+                                .body(BodyInserters.fromPublisher(Flux.fromIterable(list), SalesModel.class)))
         );
     }
 }

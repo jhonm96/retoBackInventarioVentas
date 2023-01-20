@@ -1,19 +1,19 @@
 package Bodega.com.example.demo.model;
 
 public class Product {
-        private int IdProduct;
+        private int idproducts;
         private String nombre;
         private boolean enabled;
         private int inventory;
         private int min;
         private int max;
 
-    public int getIdProduct() {
-        return IdProduct;
+    public int getIdproducts() {
+        return idproducts;
     }
 
-    public void setIdProduct(int idProduct) {
-        IdProduct = idProduct;
+    public void setIdproducts(int idproducts) {
+        this.idproducts = idproducts;
     }
 
     public String getNombre() {

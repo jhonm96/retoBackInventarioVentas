@@ -1,22 +1,22 @@
 package Bodega.com.example.demo.model;
 
 public class Producto {
-    private int IdProduct;
-    private int Cantidad;
+    private int idProduct;
+    private int cantidad;
 
-    public int getIdProduct() {
-        return IdProduct;
+    public int getidProduct() {
+        return idProduct;
     }
 
-    public void setIdProduct(int idProduct) {
-        IdProduct = idProduct;
+    public void setdProduct(int idProduct) {
+        this.idProduct = idProduct;
     }
 
-    public int getCantidad() {
-        return Cantidad;
+    public int getcantidad() {
+        return cantidad;
     }
 
     public void setCantidad(int cantidad) {
-        Cantidad = cantidad;
+        this.cantidad = cantidad;
     }
 }

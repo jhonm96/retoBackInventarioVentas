@@ -1,54 +1,56 @@
 package Bodega.com.example.demo.model;
+import org.springframework.data.annotation.Id;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
+import java.time.Instant;
 import java.util.List;
 
+
 public class SalesModel {
+    @Id
+    private int idclient;
+    private Instant date = Instant.now();
+    private String idtype;
+    private String clientname;
 
-    private LocalDate name;
-    private String IdType;
-    private Integer ID;
-    private String ClientNAme;
-    private List<Producto> Products;
+    private List<Producto> products;
 
-    public LocalDate getName() {
-        return name;
+    public Instant getDate() {
+        return date;
+    }
+    public void setDate(Instant date) {
+        this.date = Instant.now();
     }
 
-    public void setName(LocalDate name) {
-        this.name = name;
+    public String getIdtype() {
+        return idtype;
     }
 
-    public String getIdType() {
-        return IdType;
+    public void setIdtype(String idtype) {
+        this.idtype = idtype;
     }
 
-    public void setIdType(String idType) {
-        IdType = idType;
+    public int getIdclient() {
+        return idclient;
     }
 
-    public int getID() {
-        return ID;
+    public void setIdclient(int idclient) {
+        this.idclient = idclient;
     }
 
-    public void setID(int ID) {
-        this.ID = ID;
+    public String getClientname() {
+        return clientname;
     }
 
-    public String getClientNAme() {
-        return ClientNAme;
-    }
-
-    public void setClientNAme(String clientNAme) {
-        ClientNAme = clientNAme;
+    public void setClientname(String clientname) {
+        this.clientname = clientname;
     }
 
     public List<Producto> getProducts() {
-        return Products;
+        return products;
     }
 
     public void setProducts(List<Producto> products) {
-        Products = products;
+        this.products = products;
     }
+
 }
