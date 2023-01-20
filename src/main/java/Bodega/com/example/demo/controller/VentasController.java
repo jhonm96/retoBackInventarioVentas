@@ -39,13 +39,20 @@ public class VentasController {
         return route(
                 POST("/create/").and(accept(MediaType.APPLICATION_JSON)),
                 request -> {
-                    creacionDespuesdeValidacion(request).then();
-                    return ServerResponse.ok().build();
+                    creacionDespuesdeValidacion(request).doOnNext((mono)-> mono.subscribe());
+                    return creacionDelaventa(request).then(ServerResponse.ok().build());
+
                 });
     }
+    //.doOnNext((mono)-> mono.subscribe())
 
-    public Mono<Object> creacionDespuesdeValidacion(ServerRequest request) {
-        return obtenerProductosCompra(request).flatMap(productoscompra -> {
+    public Mono<ServerResponse> creacionDelaventa(ServerRequest request){
+        return template.save(request.bodyToMono(SalesModel.class), "Sales")
+                .then(ServerResponse.ok().build());
+    }
+
+    public Flux<Mono<Product>> creacionDespuesdeValidacion(ServerRequest request) {
+        return obtenerProductosCompra(request).flatMapMany(productoscompra -> {
             return validation(request).flatMapMany(listaproductosexistentesvalidada -> {
                 var productoActualizado=ActualizacionInventario(listaproductosexistentesvalidada,productoscompra);
 
