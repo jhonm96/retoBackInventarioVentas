@@ -12,12 +12,14 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import static org.springframework.web.reactive.function.server.RequestPredicates.DELETE;
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
+
+import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 
-
-
+import static org.springframework.web.reactive.function.server.RequestPredicates.PUT;
 import static org.springframework.web.reactive.function.server.RequestPredicates.accept;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
@@ -50,6 +52,22 @@ public class InventarioController {
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(BodyInserters.fromPublisher(Flux.fromIterable(list), Product.class)))
         );
+    }
+
+    @Bean
+    public RouterFunction<ServerResponse> UpdateProduct() {
+        return route(
+                PUT("/update/{name}").and(accept(MediaType.APPLICATION_JSON)),
+                request ->{
+                    return Eliminarproductoantiguo(request).flatMap(u->productoModificado(request));
+                } );
+    }
+
+    public Mono<ServerResponse> productoModificado(ServerRequest request){
+        return template.save(request.bodyToMono(Product.class), "Products").then(ServerResponse.ok().build());
+    }
+    public Mono<Product> Eliminarproductoantiguo(ServerRequest request){
+        return template.findAndRemove(findProduct(request.pathVariable("name")), (Product.class), "Products");
     }
 
 
