@@ -1,8 +1,8 @@
-package Bodega.com.example.demo.model;
+package Bodega.com.example.demo.domain.entities;
 
-public class Product {
+public class ProductModel {
         private int idproducts;
-        private String nombre;
+        private String name;
         private boolean enabled;
         private int inventory;
         private int min;
@@ -16,12 +16,12 @@ public class Product {
         this.idproducts = idproducts;
     }
 
-    public String getNombre() {
-        return nombre;
+    public String getName() {
+        return name;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public boolean isEnabled() {

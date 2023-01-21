@@ -1,4 +1,4 @@
-package Bodega.com.example.demo.model;
+package Bodega.com.example.demo.domain.entities;
 import org.springframework.data.annotation.Id;
 
 import java.time.Instant;
@@ -12,7 +12,7 @@ public class SalesModel {
     private String idtype;
     private String clientname;
 
-    private List<Producto> products;
+    private List<SalesProductsModel> products;
 
     public Instant getDate() {
         return date;
@@ -45,11 +45,11 @@ public class SalesModel {
         this.clientname = clientname;
     }
 
-    public List<Producto> getProducts() {
+    public List<SalesProductsModel> getProducts() {
         return products;
     }
 
-    public void setProducts(List<Producto> products) {
+    public void setProducts(List<SalesProductsModel> products) {
         this.products = products;
     }
 
