@@ -24,7 +24,7 @@ las colesciones de productos o compras se crean automaticamente al hacer las pet
 
 ### A continuacion dejo un enlace del entorno de trabajo de postan con las peticiones :
 
-(https://winter-satellite-541952.postman.co/workspace/1fca77a9-62a6-4d97-86b8-be6c76e16ae3/collection/18306598-2018d4ae-8073-4ec0-90ac-5c125f1800c5?action=share&creator=18306598)
+(https://www.postman.com/winter-satellite-541952/workspace/back-reto/collection/18306598-2018d4ae-8073-4ec0-90ac-5c125f1800c5?action=share&creator=18306598)
 
 El enlace redirecciona a un ambiente de trabajo de postan en el cual esta toda la documentacion necesaria para hacer las pruebas
 
